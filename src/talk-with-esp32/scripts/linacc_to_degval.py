@@ -9,14 +9,11 @@ import numpy as np
 # print 'response from server:',res.text
 # dictFromServer = res.json()
 
-ip_addr = '192.168.0.193'
-# ip_addr = '192.168.0.128'
+# ip_addr = '192.168.0.192'
+ip_addr = '192.168.0.128'
 
 def str_to_int16(str):
     return np.int16(int(str, 16))
-
-def str_to_float64(str):
-    return np.float64(int(str, 16))
 
 def aY_to_x(aY):
     return np.float32(aY) / np.float32(0x4000)
@@ -37,10 +34,8 @@ def accelHex_to_degrees(aX, aY):
             np.arctan2(aX_to_y(str_to_int16(aX)),
                        aY_to_x(str_to_int16(aY))))
 
-def linAcc_to_degrees(aX, aY):
-    return radians_to_degrees(
-            np.arctan2(aX_to_y(str_to_int16(aX)),
-                       aY_to_x(str_to_int16(aY))))
+def linAcc_to_degVal(aX, aY):
+    return radians_to_degrees(np.arctan2(aX, -aY))
 
 def normalize_degree_for_servo(degree):
     if degree > 270:
@@ -54,7 +49,7 @@ def get_accel():
     res = requests.post('http://' + ip_addr + ':80/accel')
     my_list = res.text.split(",")
     #<debug>
-    # print res.text
+    print res.text
     #</debug>
     return my_list
 
@@ -75,7 +70,7 @@ def accel_to_servo_demo():
         time.sleep(0.1)
 
 import rospy
-from std_msgs.msg import String, Header
+from std_msgs.msg import String, Header, UInt16
 from sensor_msgs.msg import Imu
 
 pkt = Imu()
@@ -91,19 +86,26 @@ def packetize_imu(my_list):
     pkt.linear_acceleration.y = 9.8 * str_to_int16(my_list[1]) / 16384.0
     pkt.linear_acceleration.z = 9.8 * str_to_int16(my_list[2]) / 16384.0
 
-def accel_talker():
-    pub = rospy.Publisher('imu/raw', Imu, queue_size=1)
-    rospy.init_node('accel', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
-        # hello_str = "hello world %s" % rospy.get_time()
-        packetize_imu(get_accel())
-        rospy.logdebug(pkt)
-        pub.publish(pkt)
-        rate.sleep()
+degVal = UInt16()
+rospy.init_node('linAcc_to_degVal', anonymous=True)
+pub = rospy.Publisher('desired_angle', UInt16, queue_size=1)    
+
+def callback(data):
+    global degVal
+    aX = data.linear_acceleration.x
+    aY = data.linear_acceleration.y
+    degVal = linAcc_to_degVal(aX, aY)
+    if degVal >= 180:
+        degVal = UInt16(degVal - 180)
+    else: # degVal < 180
+        degVal = UInt16(degVal + 180)
+    rospy.logdebug(degVal)
+    pub.publish(degVal)
+    time.sleep(0.1)
+
+def linAcc_listener():
+    rospy.Subscriber("imu/raw", Imu, callback)
+    rospy.spin()
 
 if __name__ == '__main__':
-    try:
-        accel_talker()
-    except rospy.ROSInterruptException:
-        pass
+    linAcc_listener()
