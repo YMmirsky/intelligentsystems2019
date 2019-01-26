@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import requests
 import time
 import numpy as np
@@ -9,6 +11,9 @@ import numpy as np
 
 def str_to_int16(str):
     return np.int16(int(str, 16))
+
+def str_to_float64(str):
+    return np.float64(int(str, 16))
 
 def aY_to_x(aY):
     return np.float32(aY) / np.float32(0x4000)
@@ -24,7 +29,12 @@ def radians_to_degrees(radVal):
     else:
         return np.uint16(180.0*radVal/np.pi)
 
-def accelVal_to_degrees(aX, aY):
+def accelHex_to_degrees(aX, aY):
+    return radians_to_degrees(
+            np.arctan2(aX_to_y(str_to_int16(aX)),
+                       aY_to_x(str_to_int16(aY))))
+
+def linAcc_to_degrees(aX, aY):
     return radians_to_degrees(
             np.arctan2(aX_to_y(str_to_int16(aX)),
                        aY_to_x(str_to_int16(aY))))
@@ -51,12 +61,46 @@ def set_servo(deg_val):
     print res.text
     #</debug>
 
-def run_task():
+def accel_to_servo_demo():
     while True:
         my_list = get_accel()
         deg_val = normalize_degree_for_servo(
-            accelVal_to_degrees(my_list[0], my_list[1])
+            accelHex_to_degrees(my_list[0], my_list[1])
         )
         print deg_val
         set_servo(deg_val)
         time.sleep(0.1)
+
+import rospy
+from std_msgs.msg import String, Header
+from sensor_msgs.msg import Imu
+
+pkt = Imu()
+seq = 0
+
+def packetize_imu(my_list):
+    global pkt, seq
+    pkt.header.seq = seq
+    seq = seq + 1
+    pkt.header.stamp = rospy.Time.now()
+    pkt.header.frame_id = "imu"
+    pkt.linear_acceleration.x = 9.8 * str_to_int16(my_list[0]) / 16384.0
+    pkt.linear_acceleration.y = 9.8 * str_to_int16(my_list[1]) / 16384.0
+    pkt.linear_acceleration.z = 9.8 * str_to_int16(my_list[2]) / 16384.0
+
+def accel_talker():
+    pub = rospy.Publisher('imu', Imu, queue_size=10)
+    rospy.init_node('accel', anonymous=True)
+    rate = rospy.Rate(1) # 10hz
+    while not rospy.is_shutdown():
+        # hello_str = "hello world %s" % rospy.get_time()
+        packetize_imu(get_accel())
+        rospy.loginfo(pkt)
+        pub.publish(pkt)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        accel_talker()
+    except rospy.ROSInterruptException:
+        pass
