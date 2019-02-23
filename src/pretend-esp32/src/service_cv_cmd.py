@@ -1,8 +1,10 @@
 from flask import Flask, request, render_template, jsonify
 import requests
 
-drive_addr = '127.0.0.1'
-drive_port = '5001'
+# drive_addr = '127.0.0.1'
+# drive_port = '5001'
+drive_addr = '192.168.4.1'
+drive_port = '80'
 drive_endpoint = 'handle_update'
 
 # see pretend_drive.py for description of key values
@@ -10,28 +12,44 @@ def generate_drive_xhr(direction):
     dictToSend = dict()
     if direction == 'stop':
         dictToSend['mode'] = '3'
-        dictToSend['AXIS_0'] = '0.0'
-        dictToSend['AXIS_1'] = '0.0'
-        dictToSend['AXIS_3'] = '0.0'
-        dictToSend['button_0'] = '1'
+        dictToSend['AXIS_X'] = '0.0'
+        dictToSend['AXIS_Y'] = '0.0'
+        dictToSend['THROTTLE'] = '0.0'
+        dictToSend['button_0'] = '0'
+        dictToSend['wheel_A'] = '0'
+        dictToSend['wheel_B'] = '0'
+        dictToSend['wheel_C'] = '1'
+        dictToSend['mast_position'] = '0'
     if direction == 'straight':
         dictToSend['mode'] = '3'
-        dictToSend['AXIS_0'] = '0.0'
-        dictToSend['AXIS_1'] = '1.0'
-        dictToSend['AXIS_3'] = '0.0'
+        dictToSend['AXIS_X'] = '0.0'
+        dictToSend['AXIS_Y'] = '1.0'
+        dictToSend['THROTTLE'] = '0.0'
         dictToSend['button_0'] = '1'
+        dictToSend['wheel_A'] = '0'
+        dictToSend['wheel_B'] = '0'
+        dictToSend['wheel_C'] = '0'
+        dictToSend['mast_position'] = '0'
     elif direction == 'left':
         dictToSend['mode'] = '1'
-        dictToSend['AXIS_0'] = '-1.0'
-        dictToSend['AXIS_1'] =  '0.0'
-        dictToSend['AXIS_3'] =  '0.0'
+        dictToSend['AXIS_X'] = '-1.0'
+        dictToSend['AXIS_Y'] =  '0.0'
+        dictToSend['THROTTLE'] =  '0.0'
         dictToSend['button_0'] = '1'
+        dictToSend['wheel_A'] = '1'
+        dictToSend['wheel_B'] = '1'
+        dictToSend['wheel_C'] = '1'
+        dictToSend['mast_position'] = '0'
     elif direction == 'right':
         dictToSend['mode'] = '1'
-        dictToSend['AXIS_0'] = '1.0'
-        dictToSend['AXIS_1'] = '0.0'
-        dictToSend['AXIS_3'] = '0.0'
+        dictToSend['AXIS_X'] = '1.0'
+        dictToSend['AXIS_Y'] = '0.0'
+        dictToSend['THROTTLE'] = '0.0'
         dictToSend['button_0'] = '1'
+        dictToSend['wheel_A'] = '0'
+        dictToSend['wheel_B'] = '1'
+        dictToSend['wheel_C'] = '1'
+        dictToSend['mast_position'] = '0'
     return dictToSend
 
 def count_valid_keys(dictToSend):
@@ -48,7 +66,6 @@ def send_drive_xhr(dictToSend):
         for item in dictToSend.items():
             if item[1] != '':
                 post_str = post_str + item[0] + '=' + item[1]
-        res = requests.post(post_str)
     elif count_valid_keys(dictToSend) > 1:
         first_item = True
         for item in dictToSend.items():
@@ -59,7 +76,10 @@ def send_drive_xhr(dictToSend):
                 else:
                     post_str = post_str \
                         +  '&'  + item[0] + '=' + item[1]
-        res = requests.post(post_str)
+    else:
+        post_str = post_str + 'button_0=0'
+    res = requests.post(post_str)
+    print res.text
 
 app = Flask(__name__)
 app.debug = True
