@@ -1,33 +1,37 @@
 from flask import Flask, request, render_template, jsonify
 import requests
 
+drive_addr = '127.0.0.1'
+drive_port = '5001'
+drive_endpoint = 'handle_update'
+
 # see pretend_drive.py for description of key values
 def generate_drive_xhr(direction):
     dictToSend = dict()
     if direction == 'stop':
-        dictToSend['mode'] = 3
-        dictToSend['AXIS_0'] = 0.0
-        dictToSend['AXIS_1'] = 0.0
-        dictToSend['AXIS_3'] = 0.0
-        dictToSend['button_0'] = 1
+        dictToSend['mode'] = '3'
+        dictToSend['AXIS_0'] = '0.0'
+        dictToSend['AXIS_1'] = '0.0'
+        dictToSend['AXIS_3'] = '0.0'
+        dictToSend['button_0'] = '1'
     if direction == 'straight':
-        dictToSend['mode'] = 3
-        dictToSend['AXIS_0'] = 0.0
-        dictToSend['AXIS_1'] = 1.0
-        dictToSend['AXIS_3'] = 0.0
-        dictToSend['button_0'] = 1
+        dictToSend['mode'] = '3'
+        dictToSend['AXIS_0'] = '0.0'
+        dictToSend['AXIS_1'] = '1.0'
+        dictToSend['AXIS_3'] = '0.0'
+        dictToSend['button_0'] = '1'
     elif direction == 'left':
-        dictToSend['mode'] = 1
-        dictToSend['AXIS_0'] = -1.0
-        dictToSend['AXIS_1'] =  0.0
-        dictToSend['AXIS_3'] =  0.0
-        dictToSend['button_0'] = 1
+        dictToSend['mode'] = '1'
+        dictToSend['AXIS_0'] = '-1.0'
+        dictToSend['AXIS_1'] =  '0.0'
+        dictToSend['AXIS_3'] =  '0.0'
+        dictToSend['button_0'] = '1'
     elif direction == 'right':
-        dictToSend['mode'] = 1
-        dictToSend['AXIS_0'] = 1.0
-        dictToSend['AXIS_1'] = 0.0
-        dictToSend['AXIS_3'] = 0.0
-        dictToSend['button_0'] = 1
+        dictToSend['mode'] = '1'
+        dictToSend['AXIS_0'] = '1.0'
+        dictToSend['AXIS_1'] = '0.0'
+        dictToSend['AXIS_3'] = '0.0'
+        dictToSend['button_0'] = '1'
     return dictToSend
 
 def count_valid_keys(dictToSend):
@@ -53,8 +57,8 @@ def send_drive_xhr(dictToSend):
                     post_str = post_str + item[0] + '=' + item[1]
                     first_item = False
                 else:
-                    post_str = '&' \
-                        + post_str + item[0] + '=' + item[1]
+                    post_str = post_str \
+                        +  '&'  + item[0] + '=' + item[1]
         res = requests.post(post_str)
 
 app = Flask(__name__)
@@ -71,7 +75,6 @@ def index():
 def index2():
     ret_obj = dict()
     dir_val = str(request.args.get('dir'))
-    print type(dir_val)
     print 'data from client: ' + dir_val
     if 'stop' == dir_val:
         send_drive_xhr(generate_drive_xhr('stop'))

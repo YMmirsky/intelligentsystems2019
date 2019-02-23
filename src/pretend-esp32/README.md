@@ -14,3 +14,15 @@ import requests
 res = requests.post('http://' + ip_addr + ':' + port_no + '/' + endpoint + '?' + arg1 + '=' + arg1_val)
 res.text
 ```
+Example
+```
+import requests
+res = requests.post('http://localhost:5000/cv_cmd?dir=stop')
+res.text
+res = requests.post('http://localhost:5000/cv_cmd?dir=straight')
+res.text
+res = requests.post('http://localhost:5000/cv_cmd?dir=left')
+res.text
+res = requests.post('http://localhost:5000/cv_cmd?dir=right')
+res.text
+```
