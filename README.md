@@ -1,5 +1,10 @@
 # SJSU Robotics 2018 - Cerberus Intelligence System Stack
 
+## 97. E-Stop
+```
+$ python src/pretend-esp32/src/SPAM_STOP.py
+```
+
 ## 98. Notes
 ### 1. Handling XHR requests
     * We use [Flask](http://flask.pocoo.org/)
