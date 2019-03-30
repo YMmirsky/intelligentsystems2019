@@ -1,5 +1,13 @@
 # SJSU Robotics 2018 - Cerberus Intelligence System Stack
 
+## 1. Getting started
+### 1. Pre-reqs
+1. Linux environment
+2. ROS-kinetic
+### 2. Download this project
+Use `git clone`.
+### 3. Set it up
+`cd` into the directory created by `git clone`. Run `catkin_make`
 ## 97. E-Stop
 ```
 $ python src/pretend-esp32/src/SPAM_STOP.py
