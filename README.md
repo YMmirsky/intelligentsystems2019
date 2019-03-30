@@ -4,6 +4,7 @@
 ### 1. Pre-reqs
 1. Linux environment
 2. ROS-kinetic
+3. [Intel RealSense SDK 2.0](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md#installing-the-packages)
 ### 2. Download this project
 Use `git clone`.
 ### 3. Set it up
