@@ -5,10 +5,61 @@
 1. Linux environment
 2. ROS-kinetic
 3. [Intel RealSense SDK 2.0](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md#installing-the-packages)
-### 2. Download this project
-Use `git clone`.
-### 3. Set it up
-`cd` into the directory created by `git clone`. Run `catkin_make`
+
+### 2. ROS packages in this workspace
+* pretend-esp32
+* talk-with-esp32
+* realsense2\_camera
+  * from [this repo](https://github.com/intel-ros/realsense)
+  * Using commit hash 855cf51
+
+### 3. Download this project
+```
+git clone --recursive <the_git_repo>
+cd <repo_local_directory>/src/realsense
+git checkout 855cf51
+cd -
+```
+### 4. Set it up
+`catkin_make`
+
+### 5. ROS tips
+#### rosbag
+* Replaying recordings
+  * `$ rosbag play path/to/file.bag`
+* Recording messages
+  * `$ rosbag record <list of topics>`
+* Topics to record
+  * /camera/color/camera\_info
+  * /camera/color/image\_raw
+  * /camera/depth/camera\_info
+  * /camera/depth/image\_rect\_raw
+  * /tf\_static
+
+## 96. RealSense
+### Visualize with Intel's viewer
+`$ realsense-viewer`
+
+### Bring-up
+`$ roslaunch realsense2_camera rs_camera.launch filters:=spatial,temporal,pointcloud`
+
+### Visualize in ROS rviz
+`$ roslaunch realsense2_camera view_d435_model.launch`
+You'll need to add the following to the visualizer:
+* DepthCloud
+  * /camera/depth/image\_rect\_raw as the Depth Map Topic
+  * /camera/color/image\_raw as the Color Image Topic
+* Image
+  * /camera/color/image\_raw as the Image Topic
+
+### Attributes to keep in mind
+* Point cloud is relatively noisy
+* Minimum distance: 20 cm
+* Tolerance: +/- 5 cm
+
+### Calibration
+[See this link](https://github.com/IntelRealSense/librealsense/issues/2329)
+
 ## 97. E-Stop
 ```
 $ python src/pretend-esp32/src/SPAM_STOP.py
