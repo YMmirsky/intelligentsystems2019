@@ -1,16 +1,15 @@
 #include <resource_retriever/retriever.h>
-#include <ros/console.h>
 
 // code from http://wiki.ros.org/resource_retriever/Tutorials/Retrieving%20Files
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "XHR_comm");
+  ros::init(argc, argv, "accel");
   ros::NodeHandle node_handle
 
   resource_retriever::Retriever r;
   resource_retriever::MemoryResource resource;
 
-  ros::Publisher pub = node_handle.advertise<int>("accel", 1);
+  ros::Publisher pub = node_handle.advertise<int>("imu/raw", 1);
 
   // publishing rate in hz
   ros::Rate rate(100);
