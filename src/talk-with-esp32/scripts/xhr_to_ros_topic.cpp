@@ -10,10 +10,10 @@ int main(int argc, char** argv)
   resource_retriever::Retriever r;
   resource_retriever::MemoryResource resource;
 
-  ros::Publisher pub = node_handle.advertise<int>("accel", 100);
+  ros::Publisher pub = node_handle.advertise<int>("accel", 1);
 
   // publishing rate in hz
-  ros::Rate rate(10);
+  ros::Rate rate(100);
 
   while(ros::ok())
   {
