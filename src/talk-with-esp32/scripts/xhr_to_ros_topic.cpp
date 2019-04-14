@@ -1,18 +1,27 @@
+#define _GLIBCXX_USE_C99 1
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <resource_retriever/retriever.h>
 
 // code from http://wiki.ros.org/resource_retriever/Tutorials/Retrieving%20Files
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "accel");
-  ros::NodeHandle node_handle
+  ros::NodeHandle node_handle;
 
   resource_retriever::Retriever r;
   resource_retriever::MemoryResource resource;
 
-  ros::Publisher pub = node_handle.advertise<int>("imu/raw", 1);
+  ros::Publisher pub = node_handle.advertise<double>("imu/raw", 1);
 
   // publishing rate in hz
   ros::Rate rate(100);
+
+  std::ostringstream os;
 
   while(ros::ok())
   {
@@ -27,8 +36,20 @@ int main(int argc, char** argv)
       return 1;
     }
 
-    int accel = resource.data.get();
-    pub.publish(accel);
+    unsigned char* accel = resource.data.get();
+    
+    for (int i = 0; i < resource.size; i++)
+    {
+      os << i;
+    }
+    
+    //double accel_dbl;
+    //os >> accel_dbl;
+
+    //std::string accel_string = std::string str(accel, resource.size);
+    std::string accel_string(os.str());
+    double accel_dbl = std::stod(accel_string);
+    pub.publish(accel_dbl);
 
     rate.sleep();
     
