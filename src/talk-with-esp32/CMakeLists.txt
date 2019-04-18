@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(talk-with-esp32)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -11,11 +8,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  resource_retriever
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -135,7 +132,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/talk-with-esp32_node.cpp)
 
-add_executable(talk-with-esp32 scripts/xhr_to_ros_topic.cpp)
+add_executable(xhr_to_ros_topic scripts/xhr_to_ros_topic.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -151,6 +148,13 @@ add_executable(talk-with-esp32 scripts/xhr_to_ros_topic.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(xhr_to_ros_topic
+	${catkin_LIBRARIES}
+)
+
+
+## Compile as C++11, supported in ROS Kinetic and newer
+# add_compile_options(-std=c++11)
 
 #############
 ## Install ##

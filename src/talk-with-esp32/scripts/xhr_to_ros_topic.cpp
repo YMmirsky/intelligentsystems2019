@@ -2,6 +2,7 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Int32.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -16,19 +17,23 @@ int main(int argc, char** argv)
   resource_retriever::Retriever r;
   resource_retriever::MemoryResource resource;
 
-  ros::Publisher pub = node_handle.advertise<double>("imu/raw", 1);
+  ros::Publisher pub = node_handle.advertise<std_msgs::String>("imu/raw", 1);
 
   // publishing rate in hz
   ros::Rate rate(100);
 
   std::ostringstream os;
+  std::string accel_string;
+
+  std_msgs::Int32 accel_dbl;
+  //std_msgs::String accel_string;
 
   while(ros::ok())
   {
     try
     {
       // address taken from line 41 of Nelson's test.py
-      resource = r.get("http://192.168.0.192:80/accel"); 
+      resource = r.get("http://192.168.4.1:80/update_name"); 
     }
     catch (resource_retriever::Exception& e)
     {
@@ -38,17 +43,28 @@ int main(int argc, char** argv)
 
     unsigned char* accel = resource.data.get();
     
-    for (int i = 0; i < resource.size; i++)
+    /*for (int i = 0; i < resource.size; i++)
     {
       os << i;
     }
-    
-    //double accel_dbl;
-    //os >> accel_dbl;
+    //std::string accel_string;
+    os >> accel_string;
 
-    //std::string accel_string = std::string str(accel, resource.size);
-    std::string accel_string(os.str());
-    double accel_dbl = std::stod(accel_string);
+    accel_string = std::to_string(accel);
+    */
+
+    //union { void *pl int i; } converter;
+    //converter.p = accel;
+
+
+    //double accel_int = reinterpret_cast<double>(accel);
+    //std::istringstream iss (accel_string);
+    //iss >> accel_int;
+    double accel_int = *(double*)accel;
+
+
+    //std::string accel_string(os.str());
+    accel_dbl.data = accel_int;
     pub.publish(accel_dbl);
 
     rate.sleep();
