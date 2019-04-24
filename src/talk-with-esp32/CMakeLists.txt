@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  sensor_msgs
   resource_retriever
 )
 
@@ -133,6 +134,8 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/talk-with-esp32_node.cpp)
 
 add_executable(xhr_to_ros_topic scripts/xhr_to_ros_topic.cpp)
+#add_executable(subsystem_drive scripts/subsystem_drive.py)
+#add_executable(GPS_node scripts/GPS_node.py)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -169,6 +172,10 @@ target_link_libraries(xhr_to_ros_topic
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+catkin_install_python(PROGRAMS scripts/subsystem_drive.py scripts/GPS_node.py
+	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
