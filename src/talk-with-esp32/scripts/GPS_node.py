@@ -1,5 +1,8 @@
 #!/usr/bin/env python
+
 import rospy
+import requests
+import time
 from sensor_msgs.msg import NavSatFix
 
 """ documentatnion of sensor_msgs/NavSatFix:
