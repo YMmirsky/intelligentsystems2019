@@ -48,11 +48,10 @@ def callback(msg):
 	"""
 	# I assume(?) that the max linear.x speed is 5 so I'm just going with that don't @ me
 	# The joystick axis are inverted so we need to invert this YEAH LETS DO THAT
-	d_data.AXIS_Y = 1
-	d_data.AXIS_X = 0.0
-
+	d_data.AXIS_Y = -msg.linear.x / 5
 
 	# set throttle to maximum, let position of joystick y-axis set the speed
+	# Throttle ranges from 0 (max reverse) or 1 (max forward)
 	d_data.THROTTLE = 0
 	# edge case if the rover is meaning to spin in place, similar to a differential drive turtlebot. Might not need?
 	if msg.linear.x == 0 and msg.linear.y == 0 and msg.linear.z == 0 and msg.angular.x != 0:
