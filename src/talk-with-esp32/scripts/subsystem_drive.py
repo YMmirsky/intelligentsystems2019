@@ -19,9 +19,9 @@ esp32_ipaddr = "192.168.4.1"
 class drive_data:
 	def __init__(self):	
 		self.mode = 0
-		self.AXIS_X = 0
-		self.AXIS_Y = 0
-		self.THROTTLE = 0
+		self.AXIS_X = 0.0
+		self.AXIS_Y = 0.0
+		self.THROTTLE = 0.0
 		self.button_0 = 1
 		# in drive mode, this determines which wheel 
 		self.wheel_A = 0
@@ -48,10 +48,12 @@ def callback(msg):
 	"""
 	# I assume(?) that the max linear.x speed is 5 so I'm just going with that don't @ me
 	# The joystick axis are inverted so we need to invert this YEAH LETS DO THAT
-	d_data.AXIS_Y = -msg.linear.x / 5
+	d_data.AXIS_Y = 1
+	d_data.AXIS_X = 0.0
+
 
 	# set throttle to maximum, let position of joystick y-axis set the speed
-	d_data.THROTTLE = -1
+	d_data.THROTTLE = 0
 	# edge case if the rover is meaning to spin in place, similar to a differential drive turtlebot. Might not need?
 	if msg.linear.x == 0 and msg.linear.y == 0 and msg.linear.z == 0 and msg.angular.x != 0:
 		d_data.mode = 2
@@ -59,14 +61,14 @@ def callback(msg):
 	if msg.linear.x == 0 and msg.linear.y == 0 and msg.linear.z == 0 and msg.angular.x == 0:
 		d_data.button_0 = 0
 	
-	
+	rospy.loginfo(d_data.AXIS_Y)
 
-	d_data_str = "mode=%i&AXIS_X=%d&AXIS_Y=%d&THROTTLE=%d&button_0=%b&wheel_A=%i&wheel_B=%i&wheel_C=%i&mast_position=%d"
+	d_data_str = 'mode=%i&AXIS_X=%f&AXIS_Y=%f&THROTTLE=%f&button_0=%r&wheel_A=%i&wheel_B=%i&wheel_C=%i&mast_position=%d' % (d_data.mode, d_data.AXIS_X, d_data.AXIS_Y, d_data.THROTTLE, d_data.button_0, d_data.wheel_A, d_data.wheel_B, d_data.wheel_C, d_data.mast_position)
 
 	# ip address taken from https://github.com/SJSURobotics2019/missioncontrol2019/blob/master/src/modules/Drive/DriveModule.jsx#L31
 	# endpoint taken from https://github.com/SJSURobotics2019/missioncontrol2019/blob/master/src/modules/Drive/joystick.js#L139
 	requests.post("http://" + esp32_ipaddr + ":80/handle_update?" + d_data_str)
-
+	rospy.loginfo("http://" + esp32_ipaddr + ":80/handle_update?" + d_data_str)
 
 def drive_listener():
 	
