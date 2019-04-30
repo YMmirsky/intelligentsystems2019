@@ -173,7 +173,7 @@ target_link_libraries(xhr_to_ros_topic
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-catkin_install_python(PROGRAMS scripts/subsystem_drive.py scripts/GPS_node.py
+catkin_install_python(PROGRAMS scripts/subsystem_drive.py scripts/GPS_node.py scripts/compass_module.py
 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
