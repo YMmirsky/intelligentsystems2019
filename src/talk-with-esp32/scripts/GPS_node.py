@@ -10,7 +10,7 @@ http://docs.ros.org/api/sensor_msgs/html/msg/NavSatFix.html """
 
 def get_coords():
 	gps = requests.post("http://blahblahblah:80/GPS???")
-	gps_list = res.text.split(",")
+	gps_list = gps.text.split(",")
 	return gps_list
 
 def GPS_node():
