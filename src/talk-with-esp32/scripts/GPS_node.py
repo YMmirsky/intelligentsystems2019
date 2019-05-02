@@ -8,8 +8,10 @@ from sensor_msgs.msg import NavSatFix
 """ documentatnion of sensor_msgs/NavSatFix:
 http://docs.ros.org/api/sensor_msgs/html/msg/NavSatFix.html """
 
+esp32_ipaddr = "192.168.4.1"
+
 def get_coords():
-	gps = requests.post("http://blahblahblah:80/GPS???")
+	gps = requests.post("http://" + esp32_ipaddr + ":80/GPS???")
 	gps_list = gps.text.split(",")
 	return gps_list
 
@@ -22,8 +24,8 @@ def GPS_node():
 	while not rospy.is_shutdown():
 		gps_list = get_coords()
 		# websocket stuff goes here
-		# don't know how the GPS data will be transmitted from the ESP32 but who cares HEYOOOOO
-		# lets just say that the robot is already on Mars, yeah?
+		# don't know how the GPS data will be transmitted from the ESP32
+		# lets just say that the robot is already on Mars, yeah? I think getting the robot to Mars should give us an automatic win.
 		msg.latitude = 0.0
 		msg.longitude = 0.0
 		msg.altidude = 0.0

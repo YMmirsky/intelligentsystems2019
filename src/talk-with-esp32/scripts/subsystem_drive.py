@@ -8,23 +8,26 @@ import tf.transformations
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
-"""
-DM_DEBUG = 0
-DM_CRAB = 1
-DM_SPIN = 2
-DM_DRIVE = 3
-"""
 esp32_ipaddr = "192.168.4.1"
 topic_to_listen = "drive_directions"
 
 class drive_data:
 	def __init__(self):	
+		"""
+		List of drive mode enums:
+		DM_DEBUG = 0
+		DM_CRAB = 1
+		DM_SPIN = 2
+		DM_DRIVE = 3
+		"""
 		self.mode = 0
 		self.AXIS_X = 0.0
 		self.AXIS_Y = 0.0
 		self.THROTTLE = 0.0
+		# on the physical joystick the button acts as a dead man's switch
 		self.button_0 = 1
-		# in drive mode, this determines which wheel 
+		# in drive mode, this determines which wheel is the rear wheel
+		# this may be changed depending on the position of the RealSense camera on the rover
 		self.wheel_A = 0
 		self.wheel_B = 0
 		self.wheel_C = 1
@@ -49,16 +52,16 @@ def callback(msg):
 	# The joystick axis are inverted so we need to invert this YEAH LETS DO THAT
 	# note that axis_y is front and back axis, axis_x is side to side
 	d_data.AXIS_Y = -msg.linear.x / 5
-	d_data.AXIS_X = msg.angular.z # this is almost certainly wrong
+	d_data.AXIS_X = msg.angular.z  # this is almost certainly wrong
 
-	# set throttle to maximum, let position of joystick y-axis set the speed
+	# pin the throttle to maximum, let position of joystick y-axis set the speed
 	# Throttle ranges from 0 (max reverse) or 1 (max forward)
 	d_data.THROTTLE = 0
 	# edge case if the rover is meaning to spin in place, similar to a differential drive turtlebot. Might not need?
-	if msg.linear.x == 0 and msg.linear.y == 0 and msg.linear.z == 0 and msg.angular.z != 0:
+	if msg.linear.x == 0 and msg.angular.z != 0:
 		d_data.mode = 2
 	# no movement commands mean to brake immediately
-	if msg.linear.x == 0 and msg.linear.y == 0 and msg.linear.z == 0 and msg.angular.z == 0:
+	elif msg.linear.x == 0 and msg.angular.z == 0:
 		d_data.button_0 = 0
 
 	# need to format this line into something actually digestible especially if the drive endpoint changes somehow
@@ -72,7 +75,7 @@ def callback(msg):
 def drive_listener():
 	rospy.init_node('drive_listener')
 	rospy.Subscriber(topic_to_listen, Twist, callback)
-	rospy.loginfo("Node 'drive_listener' started. \nListening to '%s'. talking to ESP32 on ip address %s", topic_to_listen, esp32_ipaddr)
+	rospy.loginfo("Node 'drive_listener' started.\nListening to '%s'. talking to Drive ESP32 on IP address %s", topic_to_listen, esp32_ipaddr)
 	rospy.spin()
 
 if __name__ == '__main__':
