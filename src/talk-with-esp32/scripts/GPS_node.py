@@ -19,6 +19,7 @@ def GPS_node():
 	pub = rospy.Publisher('NavSatFix', NavSatFix)
 	rospy.init_node('GPS', anonymous=True)
 	rate = rospy.Rate(10) # 10hz
+	rospy.loginfo("Node 'GPS' started. Talking to GPS ESP32 on IP address %s", esp32_ipaddr)
 	msg = NavSatFix
 
 	while not rospy.is_shutdown():
