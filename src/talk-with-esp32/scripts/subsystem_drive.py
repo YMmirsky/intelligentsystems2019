@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-import rospy
-import requests
-import time 
+import rospy, math, requests, time
 import numpy as np
 import tf.transformations
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
 esp32_ipaddr = "192.168.4.1"
-topic_to_listen = "drive_directions"
+topic_to_listen = "cmd_vel"
+wheelbase = 0.88537 # distance in meters from the midpoint of the front wheels to the back wheel
 
 class drive_data:
 	def __init__(self):	
@@ -33,6 +32,19 @@ class drive_data:
 		self.wheel_C = 1
 		self.mast_position = 0
 
+# code taken from http://wiki.ros.org/teb_local_planner/Tutorials/Planning%20for%20car-like%20robots
+
+def convert_trans_rot_vel_to_steering_angle(v, omega, wheelbase):
+	if omega == 0 or v == 0:
+		return 0
+	radius = v / omega
+	return math.atan(wheelbase / radius)
+
+def normalize_steering(steering_angle):
+	min_steer = -1
+	max_steer = 1
+	return ((steering_angle - min_steer)/(max_steer-min_steer))
+
 def callback(msg):
 	# each element in the message is a float64
 	#now = rospy.get_rostime()
@@ -52,16 +64,19 @@ def callback(msg):
 	# The joystick axis are inverted so we need to invert this YEAH LETS DO THAT
 	# note that axis_y is front and back axis, axis_x is side to side
 	d_data.AXIS_Y = -msg.linear.x / 5
-	d_data.AXIS_X = msg.angular.z  # this is almost certainly wrong
+	#d_data.AXIS_X = msg.angular.z  # this is almost certainly wrong
+	steering_angle = convert_trans_rot_vel_to_steering_angle(msg.linear.x, msg.angular.z, wheelbase)
+	d_data.AXIS_X = normalize_steering(steering_angle)
+	rospy.loginfo("Steering angle: %f, steering angle scaled to joystick: %f"%(steering_angle, d_data.AXIS_X))
 
 	# pin the throttle to maximum, let position of joystick y-axis set the speed
 	# Throttle ranges from 0 (max reverse) or 1 (max forward)
 	d_data.THROTTLE = 0
 	# edge case if the rover is meaning to spin in place, similar to a differential drive turtlebot. Might not need?
-	if msg.linear.x == 0 and msg.angular.z != 0:
+	if msg.linear.x == 0 and msg.linear.y == 0 and msg.angular.z != 0:
 		d_data.mode = 2
 	# no movement commands mean to brake immediately
-	elif msg.linear.x == 0 and msg.angular.z == 0:
+	elif msg.linear.x == 0 and msg.linear.y == 0 and msg.angular.z == 0:
 		d_data.button_0 = 0
 
 	# need to format this line into something actually digestible especially if the drive endpoint changes somehow
