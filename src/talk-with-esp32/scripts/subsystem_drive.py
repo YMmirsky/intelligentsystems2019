@@ -45,11 +45,14 @@ def convert_trans_rot_vel_to_steering_angle(v, omega):
 	radius = v / omega
 	return math.atan(wheelbase / radius)
 
+# converts the steering angle calculated in the above function to an x-axis joystick value.
+# 45 degrees to the left = -1, 45 degrees to the right = 1. I think...
 def normalize_steering(steering_angle):
 	min_steer = -1
 	max_steer = 1
-	return ((steering_angle - min_steer)/(max_steer-min_steer))
+	return ((steering_angle - min_steer) / (max_steer - min_steer))
 
+# msg is the twist message. Look at the loginfo statements for info on whats inside msg
 def callback(msg):
 	# each element in the message is a float64
 	#now = rospy.get_rostime()
@@ -72,7 +75,6 @@ def callback(msg):
 	# The joystick axis are inverted so we need to invert this YEAH LETS DO THAT
 	# note that axis_y is front and back axis, axis_x is side to side
 	d_data.AXIS_Y = -msg.linear.x / 5
-	#d_data.AXIS_X = msg.angular.z  # this is almost certainly wrong
 	steering_angle = convert_trans_rot_vel_to_steering_angle(msg.linear.x, msg.angular.z)
 	d_data.AXIS_X = normalize_steering(steering_angle)
 	rospy.loginfo("Steering angle: %f, steering angle scaled to joystick: %f"%(steering_angle, d_data.AXIS_X))
@@ -84,8 +86,9 @@ def callback(msg):
 	if msg.linear.x == 0 and msg.linear.y == 0 and msg.angular.z == 0:
 		d_data.BRAKES = 0
 
-	# need to format this line into something actually digestible especially if the drive endpoint changes somehow
-	d_data_str = "mode=%i&AXIS_X=%f&AXIS_Y=%f&YAW=%f&THROTTLE=%f&BRAKES=%r&MAST_POSITION=%f&TRIGGER=%r&REVERSE=%r&wheel_A=%i&wheel_B=%i&wheel_C=%i" % (d_data.mode, d_data.T_MAX, d_data.AXIS_X, d_data.AXIS_Y, d_data.YAW, d_data.THROTTLE, d_data.BRAKES, drive_data.MAST_POSITION, d_data.TRIGGER, d_data.REVERSE, d_data.wheel_A, d_data.wheel_B, d_data.wheel_C)
+	d_data_str = "mode=%i&AXIS_X=%f&AXIS_Y=%f&YAW=%f&THROTTLE=%f&BRAKES=%r&MAST_POSITION=%f&TRIGGER=%r&REVERSE=%r&wheel_A=%i&wheel_B=%i&wheel_C=%i" % (
+		d_data.mode, d_data.T_MAX, d_data.AXIS_X, d_data.AXIS_Y, d_data.YAW, d_data.THROTTLE, d_data.BRAKES, 
+		drive_data.MAST_POSITION, d_data.TRIGGER, d_data.REVERSE, d_data.wheel_A, d_data.wheel_B, d_data.wheel_C)
 
 	# ip address taken from https://github.com/SJSURobotics2019/missioncontrol2019/blob/master/src/modules/Drive/DriveModule.jsx#L31
 	# endpoint taken from https://github.com/SJSURobotics2019/missioncontrol2019/blob/master/src/modules/Drive/joystick.js#L139
@@ -100,4 +103,3 @@ def drive_listener():
 
 if __name__ == '__main__':
 	drive_listener()
-
