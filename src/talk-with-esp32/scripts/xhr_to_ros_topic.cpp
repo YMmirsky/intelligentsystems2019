@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     accel_dbl.data = accel_int;
     pub.publish(accel_dbl);
 
-    rate.sleep();
+    rate.sleep(); 
     
     //FILE* f = fopen("out.txt", "w");
     //fwrite(resource.data.get(), resource.size, 1, f);
