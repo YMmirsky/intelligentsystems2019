@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import roslibpy # used for rosbridge communication
 import rospy
 import requests
 import time
