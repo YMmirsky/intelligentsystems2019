@@ -9,11 +9,17 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
-  resource_retriever
+  #resource_retriever
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+#find_package(libcurlpp-dev REQUIRED)
+#pkg_check_modules(CURLPP REQUIRED curlpp-dev)
+#find_package(curlpp REQUIRED)
+FIND_LIBRARY(LIBCURLPP_LIBRARY curlpp /usr/include/curlpp)
+#INCLUDE_DIRECTORIES(/usr/include/curlpp)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -116,6 +122,8 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  /usr/share/doc/libcurlpp-dev/Easy.hpp
+  /usr/include/curlpp
 )
 
 ## Declare a C++ library
@@ -152,12 +160,13 @@ add_executable(xhr_to_ros_topic scripts/xhr_to_ros_topic.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(xhr_to_ros_topic
-	${catkin_LIBRARIES}
+	${catkin_LIBRARIES} ${LIBCURLPP_LIBRARY}
 )
 
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+add_compile_options(g++ xhr_to_ros_topic.cpp -lcurlpp -lcurl)
 
 #############
 ## Install ##
