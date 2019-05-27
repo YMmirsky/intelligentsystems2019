@@ -7,13 +7,17 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <stdio.h>
 
+#include <curl/curl.h>
+#include <memory>
+/*
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Exception.hpp>
 //#include <resource_retriever/retriever.h>
-
+*/
 // code from http://wiki.ros.org/resource_retriever/Tutorials/Retrieving%20Files
 int main(int argc, char** argv)
 {
@@ -32,8 +36,6 @@ int main(int argc, char** argv)
   std::string accel_string;
 
   std::stringstream result;
-
-  std::string url = "http://192.168.4.1:80/update_name";
   int count = 0;
 
   std_msgs::Int32 accel_dbl;
@@ -41,38 +43,68 @@ int main(int argc, char** argv)
   sensor_msgs::NavSatFix gps;
   //std_msgs::String accel_string;
 
+  CURL *curl = curl_easy_init();
+  CURLcode res;
+  /*res = curl_globabl_init(CURL_GLOBAL_DEFAULT);
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed: %s\n",
+            curl_easy_strerror(res));
+    return 1;
+  } */
+
+
   while(ros::ok())
   {
+    if (curl)
+    {
+      /* First set the URL that is about to receive our POST. This URL can
+       just as well be a https:// URL if that is what should receive the
+       data. */ 
+    curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.4.1:80/update_name?");
+    /* Now specify the POST data */ 
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=death grips");
+ 
+    /* Perform the request, res will get the return code */ 
+    res = curl_easy_perform(curl);
+
+    /* Check for errors */ 
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+    ROS_ERROR_STREAM("Node 'GPS' started. Talking to GPS ESP32 on IP address ");
+
+    /* always cleanup */ 
+    curl_easy_cleanup(curl);
+    }
+    /*
     try 
     {
       curlpp::Cleanup cleaner;
       curlpp::Easy request;
-      
       request.setOpt(new curlpp::options::Url(url)); 
-      request.setOpt(new curlpp::options::Verbose(true)); 
-      
+      request.setOpt(new curlpp::options::Verbose(true));   
       std::list<std::string> header; 
       header.push_back("Content-Type: application/octet-stream"); 
-      
       request.setOpt(new curlpp::options::HttpHeader(header)); 
-      
       //request.setOpt(new curlpp::options::PostFields("abcd"));
       //request.setOpt(new curlpp::options::PostFieldSize(5));
       request.setOpt(new curlpp::options::WriteStream(&result));
-      request.perform(); 
-
+      request.perform();
       //const std::string tmp = result.str();
       //const char* cstr_result = result.c_str();
-      //ROS_INFO(tmp);
+      //ROS_INFO(tmp);  
+
     }
     catch ( curlpp::LogicError & e )
     {
-      ROS_INFO(e.what());
+      // temporarily commented out
+      //ROS_INFO(e.what());
     }
     catch ( curlpp::RuntimeError & e )
     {
-      ROS_INFO(e.what());
+      //ROS_INFO(e.what());
     }
+    */
 
     /*try
     {

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(talk-with-esp32)
+include(FindPkgConfig)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -12,14 +13,19 @@ find_package(catkin REQUIRED COMPONENTS
   #resource_retriever
 )
 
+pkg_check_modules(CURLPP REQUIRED curlpp)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 #find_package(libcurlpp-dev REQUIRED)
 #pkg_check_modules(CURLPP REQUIRED curlpp-dev)
 #find_package(curlpp REQUIRED)
-FIND_LIBRARY(LIBCURLPP_LIBRARY curlpp /usr/include/curlpp)
+FIND_LIBRARY(LIBCURLPP_LIBRARY curlpp /usr/lib/x86_64-linux-gnu/libcurlpp.so)
 #INCLUDE_DIRECTORIES(/usr/include/curlpp)
 
+# experimental:
+#ADD_SUBDIRECTORY(/usr/lib/x86_64-linux-gnu/libcurl.so)
+#INCLUDE_DIRECTORIES(${CURLPP_SOURCE_DIR}/include)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -122,7 +128,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
-  /usr/share/doc/libcurlpp-dev/Easy.hpp
+  #/usr/share/doc/libcurlpp-dev
   /usr/include/curlpp
 )
 
@@ -141,7 +147,13 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/talk-with-esp32_node.cpp)
 
+set(CMAKE_CXX_STANDARD 14)
 add_executable(xhr_to_ros_topic scripts/xhr_to_ros_topic.cpp)
+project(talk_with_esp32)
+target_link_libraries(xhr_to_ros_topic
+	${catkin_LIBRARIES} curl
+)
+
 #add_executable(subsystem_drive scripts/subsystem_drive.py)
 #add_executable(GPS_node scripts/GPS_node.py)
 
@@ -159,14 +171,15 @@ add_executable(xhr_to_ros_topic scripts/xhr_to_ros_topic.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(xhr_to_ros_topic
-	${catkin_LIBRARIES} ${LIBCURLPP_LIBRARY}
-)
 
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11 -lcurlpp)
 add_compile_options(g++ xhr_to_ros_topic.cpp -lcurlpp -lcurl)
+
+#experimental
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "-lcurlpp")
+
 
 #############
 ## Install ##
@@ -219,3 +232,42 @@ catkin_install_python(PROGRAMS scripts/subsystem_drive.py scripts/GPS_node.py sc
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+##CURLPP stuff https://github.com/jpbarrette/curlpp/blob/master/CMakeLists.txt
+
+# Conan.io integration
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+    message(STATUS "got Conan.io integration")
+endif()
+
+# for unix platform, define install directories.
+include(GNUInstallDirs)
+
+message(STATUS "Looking for CURL")
+include(FindCURL)
+find_package(CURL REQUIRED)
+
+if(CURL_FOUND)
+  message(STATUS "Found CURL version: ${CURL_VERSION_STRING}")
+  message(STATUS "Using CURL include dir(s): ${CURL_INCLUDE_DIRS}")
+  message(STATUS "Using CURL lib(s): ${CURL_LIBRARIES}")
+else()
+  message(FATAL_ERROR "Could not find CURL")
+endif()
+
+# All following targets should search these directories for headers
+include_directories( 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CURL_INCLUDE_DIRS}
+)
+
+
+
+# install headers
+install(DIRECTORY include/utilspp/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/utilspp")
+install(DIRECTORY include/curlpp/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/curlpp")
+
+# install headers
+install(DIRECTORY include/utilspp/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/utilspp")
