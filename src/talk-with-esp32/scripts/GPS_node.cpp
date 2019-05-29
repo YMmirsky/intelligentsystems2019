@@ -104,6 +104,10 @@ int main(int argc, char** argv)
       }
       GPS.latitude = coords[0];
       GPS.longitude = coords[1];
+      GPS.header.stamp.sec = coords[2];
+      // NMEA messages (according to Colin) come in centiseconds
+      // NavSatFix messages come in nanoseconds after seconds 
+      GPS.header.stamp.nsec = coords[3] * 10000000;
       GPS.altitude = 0;
       GPS.position_covariance = {0,0,0,0,0,0,0,0,0};
       pub.publish(GPS);
