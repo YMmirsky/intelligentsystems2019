@@ -149,9 +149,16 @@ include_directories(
 
 set(CMAKE_CXX_STANDARD 14)
 add_executable(xhr_to_ros_topic scripts/xhr_to_ros_topic.cpp)
+
 project(talk_with_esp32)
 target_link_libraries(xhr_to_ros_topic
 	${catkin_LIBRARIES} curl
+)
+
+#commented out TEMPORARILY
+add_executable(GPS_node scripts/GPS_node.cpp)
+target_link_libraries(GPS_node
+  ${catkin_LIBRARIES} curl
 )
 
 #add_executable(subsystem_drive scripts/subsystem_drive.py)
