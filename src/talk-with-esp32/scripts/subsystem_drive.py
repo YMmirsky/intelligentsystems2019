@@ -29,7 +29,7 @@ class drive_data:
 		self.THROTTLE = 0.0
 		self.BRAKES = 0
 		# on the physical joystick the button acts as a dead man's switch
-		self.mast_position = 0
+		self.MAST_POSITION = 0
 		self.TRIGGER = 0
 		self.REVERSE = 0
 		# in drive mode, this determines which wheel is the rear wheel
@@ -86,9 +86,9 @@ def callback(msg):
 	if msg.linear.x == 0 and msg.linear.y == 0 and msg.angular.z == 0:
 		d_data.BRAKES = 0
 
-	d_data_str = "mode=%i&AXIS_X=%f&AXIS_Y=%f&YAW=%f&THROTTLE=%f&BRAKES=%r&MAST_POSITION=%f&TRIGGER=%r&REVERSE=%r&wheel_A=%i&wheel_B=%i&wheel_C=%i" % (
+	d_data_str = "mode=%i&T_MAX=%i&AXIS_X=%f&AXIS_Y=%f&YAW=%f&THROTTLE=%f&BRAKES=%r&MAST_POSITION=%f&TRIGGER=%r&REVERSE=%r&wheel_A=%i&wheel_B=%i&wheel_C=%i" % (
 		d_data.mode, d_data.T_MAX, d_data.AXIS_X, d_data.AXIS_Y, d_data.YAW, d_data.THROTTLE, d_data.BRAKES, 
-		drive_data.MAST_POSITION, d_data.TRIGGER, d_data.REVERSE, d_data.wheel_A, d_data.wheel_B, d_data.wheel_C)
+		d_data.MAST_POSITION, d_data.TRIGGER, d_data.REVERSE, d_data.wheel_A, d_data.wheel_B, d_data.wheel_C)
 
 	# ip address taken from https://github.com/SJSURobotics2019/missioncontrol2019/blob/master/src/modules/Drive/DriveModule.jsx#L31
 	# endpoint taken from https://github.com/SJSURobotics2019/missioncontrol2019/blob/master/src/modules/Drive/joystick.js#L139
